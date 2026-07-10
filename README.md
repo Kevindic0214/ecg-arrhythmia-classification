@@ -10,6 +10,7 @@
 </p>
 
 **Course:** Introduction to Artificial Intelligence — Final Project · National Yang Ming Chiao Tung University (NYCU)
+**📄 Full report:** [read the PDF](report/Classification_of_Cardiac_Arrhythmias_report.pdf) (renders in-browser on GitHub)
 **🎬 Video walkthrough:** https://www.youtube.com/watch?v=lN3h-1SXbGI
 **▶️ Reproduce on a free GPU:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Kevindic0214/ecg-arrhythmia-classification/blob/main/notebooks/reproduce_cpsc2018_colab.ipynb) — one click downloads the real CPSC-2018 data and runs the full pipeline end-to-end.
 
@@ -232,6 +233,7 @@ ecg-arrhythmia-classification/
 ├── notebooks/
 │   └── reproduce_cpsc2018_colab.ipynb   # One-click end-to-end reproduction on Colab GPU
 └── report/
+    ├── Classification_of_Cardiac_Arrhythmias_report.pdf    # Full write-up (browsable on GitHub)
     └── Classification_of_Cardiac_Arrhythmias_report.docx
 ```
 
@@ -292,4 +294,4 @@ I was primarily responsible for the end-to-end technical pipeline of this projec
 
 ---
 
-<sub>This repository accompanies a course final project. The report in `report/` contains the full write-up.</sub>
+<sub>This repository accompanies a course final project. The [full report (PDF)](report/Classification_of_Cardiac_Arrhythmias_report.pdf) in `report/` contains the complete write-up.</sub>
