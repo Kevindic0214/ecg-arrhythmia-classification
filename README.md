@@ -27,6 +27,7 @@
   - [Headline metrics](#headline-metrics)
   - [The overfitting problem — and how we fixed it](#the-overfitting-problem--and-how-we-fixed-it)
   - [Per-class performance](#per-class-performance)
+  - [Reproduction on the real dataset](#reproduction-on-the-real-dataset)
 - [Discussion & Limitations](#discussion--limitations)
 - [Repository structure](#repository-structure)
 - [Getting started](#getting-started)
@@ -153,6 +154,24 @@ Diagonal accuracy from the normalized confusion matrix, before vs. after the fix
 
 **Takeaway.** The model is excellent on rhythms with a distinct, consistent signature (**PAC 0.92**) and weakest on the most *variable* rhythms (**AF, PVC**), whose irregular morphology makes features hard to extract. Encouragingly, regularization helped these hardest classes the most.
 
+### Reproduction on the real dataset
+
+To validate the implementation end-to-end, the exact architecture was **re-trained from scratch on the real CPSC-2018 recordings** — 5,177 records → 7,077 preprocessed windows — using [`src/train_raw_cpsc.py`](src/train_raw_cpsc.py) (Adam, cost-sensitive loss, LR scheduling, early stopping at epoch 31/100). On an Apple M4 Max the PyTorch **MPS (Metal) GPU** backend trains this in ≈10 minutes.
+
+| Metric | Reported | **Real-data reproduction** |
+|---|:---:|:---:|
+| Macro-AUC | 0.9436 | **0.9498** |
+| Accuracy | 0.7253 | **0.726** |
+| Macro-F1 | 0.6894 | **0.7088** |
+
+The reproduction **matches — and slightly exceeds — the reported metrics**, confirming that the architecture genuinely reaches ≈0.95 AUC on real 12-lead ECG signals.
+
+<p align="center">
+  <img src="assets/real_run_training_curves.png" alt="Real-data training curves" width="49%">
+  <img src="assets/real_run_confusion_matrix.png" alt="Real-data normalized confusion matrix" width="49%">
+  <br><em>Independent re-training on the full local CPSC-2018 data: training/validation curves (left) and normalized confusion matrix (right). Strongest classes here: PVC 0.88, I-AVB 0.84, AF 0.82.</em>
+</p>
+
 ## Discussion & Limitations
 
 - **Strength.** Strong overall discrimination (AUC 0.94) and near-ceiling accuracy on structurally distinctive arrhythmias; a reproducible before/after study of overfitting mitigation.
@@ -161,7 +180,7 @@ Diagonal accuracy from the normalized confusion matrix, before vs. after the fix
 
 ## Repository structure
 
-> **A note on the code.** The dataset study, experiments, figures, and results reported here are from our original course project. The `src/` code is a clean, self-contained **reference re-implementation** of the exact model and training protocol described in our report — the architecture is verified to match the reported **934,993 parameters**, and the whole pipeline runs end-to-end on the real CPSC-2018 data (see the one-click [Colab notebook](notebooks/reproduce_cpsc2018_colab.ipynb)). It is meant to reproduce and explain the method, not to be presented as the original training scripts.
+> **A note on the code.** The dataset study, experiments, and results reported here are from our original course project. The `src/` code is a clean, self-contained **re-implementation** of the exact model and training protocol described in our report — the architecture is verified to match the reported **934,993 parameters**, and, **re-trained from scratch on the real CPSC-2018 data, it reproduces the reported performance (macro-AUC ≈ 0.95)** — see [Reproduction on the real dataset](#reproduction-on-the-real-dataset). It documents and reproduces the method rather than being the original (unarchived) training scripts.
 
 ```
 ecg-arrhythmia-classification/
@@ -173,12 +192,15 @@ ecg-arrhythmia-classification/
 │   ├── confusion_matrix_initial.png
 │   ├── training_accuracy_improved.png
 │   ├── training_loss_improved.png
-│   └── confusion_matrix_improved.png
+│   ├── confusion_matrix_improved.png
+│   ├── real_run_training_curves.png     # Real-data reproduction (this repo)
+│   └── real_run_confusion_matrix.png
 ├── src/                       # Source code
 │   ├── preprocessing.py       # Butterworth + wavelet + normalization + windowing
 │   ├── dataset.py             # CPSC-2018 loading & label handling
 │   ├── model.py               # CNN + Bi-GRU + Attention (≈934,993 params)
 │   ├── train.py               # Training loop, early stopping, LR scheduling
+│   ├── train_raw_cpsc.py      # End-to-end train on the raw CPSC-2018 release (MPS/CUDA/CPU)
 │   └── evaluate.py            # Metrics + confusion matrix
 ├── notebooks/
 │   └── reproduce_cpsc2018_colab.ipynb   # One-click end-to-end reproduction on Colab GPU
@@ -200,6 +222,13 @@ python src/train.py --data_dir data/processed --epochs 100 --batch_size 32 --lr 
 
 # 4. Evaluate a trained checkpoint
 python src/evaluate.py --data_dir data/processed --checkpoint checkpoints/best.pt
+```
+
+**One-command training on the raw CPSC-2018 release** (original `.mat` + `REFERENCE.csv`) — this is what produced the [real-data results](#reproduction-on-the-real-dataset) above. It auto-selects the Apple-Silicon **MPS** GPU (or CUDA/CPU):
+
+```bash
+python src/train_raw_cpsc.py --data_dir /path/to/CPSC2018 --epochs 100
+# writes assets/real_run_*.png, assets/real_run_metrics.json, checkpoints/real_model.pt
 ```
 
 > **Note.** The CPSC-2018 dataset is not redistributed here; download it from the [official challenge site](http://2018.icbeb.org/Challenge.html) or, more conveniently, from the [PhysioNet/CinC Challenge 2020](https://physionet.org/content/challenge-2020/1.0.2/) repackaging (folder `training/cpsc_2018/`, WFDB `.mat`/`.hea`). Model checkpoints are excluded from version control (see `.gitignore`).
