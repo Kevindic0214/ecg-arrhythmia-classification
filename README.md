@@ -216,9 +216,18 @@ National Yang Ming Chiao Tung University — *Introduction to Artificial Intelli
 
 | Member | Student ID |
 |---|---|
-| **謝弘廷** | **110704054** |
+| **謝弘廷 (Hung-Ting Hsieh)** | **110704054** |
 | 陳宇軒 | 0810996 |
 | 饒筠清 | 10805046 |
+
+### My contributions — 謝弘廷 (Hung-Ting Hsieh)
+
+I was primarily responsible for the end-to-end technical pipeline of this project:
+
+- **Signal preprocessing** — built the ECG cleaning pipeline: Butterworth 1 Hz high-pass filtering for baseline-wander removal, db4 wavelet denoising, min-max normalization, and fixed 10-second (5000-sample) windowing.
+- **Model architecture** — designed and implemented the hybrid **CNN + Bidirectional GRU + Attention** network (≈934,993 parameters), including the attention layer that makes the model's decisions interpretable.
+- **Training & experiments** — ran the training pipeline and **diagnosed the epoch-20 loss spike / overfitting**, then resolved it with dropout (0.3) and step learning-rate scheduling — the central result of the project.
+- **Evaluation & analysis** — produced the confusion-matrix and per-class evaluation, and identified *why* the most beat-to-beat-variable rhythms (AF, PVC) are the hardest classes and benefited most from regularization.
 
 ---
 
