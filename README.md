@@ -11,6 +11,7 @@
 
 **Course:** Introduction to Artificial Intelligence — Final Project · National Yang Ming Chiao Tung University (NYCU)
 **🎬 Video walkthrough:** https://www.youtube.com/watch?v=lN3h-1SXbGI
+**▶️ Reproduce on a free GPU:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Kevindic0214/ecg-arrhythmia-classification/blob/main/notebooks/reproduce_cpsc2018_colab.ipynb) — one click downloads the real CPSC-2018 data and runs the full pipeline end-to-end.
 
 ---
 
@@ -160,7 +161,7 @@ Diagonal accuracy from the normalized confusion matrix, before vs. after the fix
 
 ## Repository structure
 
-> **A note on the code.** The dataset study, experiments, figures, and results reported here are from our original course project. The `src/` code is a clean, self-contained **reference re-implementation** of the exact model and training protocol described in our report — the architecture is verified to match the reported **934,993 parameters**. We rebuilt it as documented, runnable code for this repository; it is meant to reproduce and explain the method, not to be presented as the original training scripts.
+> **A note on the code.** The dataset study, experiments, figures, and results reported here are from our original course project. The `src/` code is a clean, self-contained **reference re-implementation** of the exact model and training protocol described in our report — the architecture is verified to match the reported **934,993 parameters**, and the whole pipeline runs end-to-end on the real CPSC-2018 data (see the one-click [Colab notebook](notebooks/reproduce_cpsc2018_colab.ipynb)). It is meant to reproduce and explain the method, not to be presented as the original training scripts.
 
 ```
 ecg-arrhythmia-classification/
@@ -179,6 +180,8 @@ ecg-arrhythmia-classification/
 │   ├── model.py               # CNN + Bi-GRU + Attention (≈934,993 params)
 │   ├── train.py               # Training loop, early stopping, LR scheduling
 │   └── evaluate.py            # Metrics + confusion matrix
+├── notebooks/
+│   └── reproduce_cpsc2018_colab.ipynb   # One-click end-to-end reproduction on Colab GPU
 └── report/
     └── Classification_of_Cardiac_Arrhythmias_report.docx
 ```
@@ -199,7 +202,9 @@ python src/train.py --data_dir data/processed --epochs 100 --batch_size 32 --lr 
 python src/evaluate.py --data_dir data/processed --checkpoint checkpoints/best.pt
 ```
 
-> **Note.** The CPSC-2018 dataset is not redistributed here; download it from the [official challenge site](http://2018.icbeb.org/Challenge.html). Model checkpoints are excluded from version control (see `.gitignore`).
+> **Note.** The CPSC-2018 dataset is not redistributed here; download it from the [official challenge site](http://2018.icbeb.org/Challenge.html) or, more conveniently, from the [PhysioNet/CinC Challenge 2020](https://physionet.org/content/challenge-2020/1.0.2/) repackaging (folder `training/cpsc_2018/`, WFDB `.mat`/`.hea`). Model checkpoints are excluded from version control (see `.gitignore`).
+
+**Zero-setup option.** Don't want to install anything? Open the [**Colab notebook**](notebooks/reproduce_cpsc2018_colab.ipynb) — it downloads the real data and runs preprocessing → training → evaluation on a free GPU, producing the metrics and confusion matrix.
 
 ## References
 
