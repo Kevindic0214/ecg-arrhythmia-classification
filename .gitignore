@@ -7,13 +7,16 @@ env/
 
 # Data & model artifacts (do not commit large binaries / PHI)
 data/
-checkpoints/
+checkpoints/*
 *.pt
 *.pth
 *.mat
 *.hdf5
 *.npy
 *.npz
+
+# ...but ship the trained reproduction checkpoint (3.7 MB) so eval/visualization run out of the box
+!checkpoints/real_model.pt
 
 # OS / editor
 .DS_Store

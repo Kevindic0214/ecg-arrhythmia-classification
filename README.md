@@ -28,6 +28,7 @@
   - [The overfitting problem — and how we fixed it](#the-overfitting-problem--and-how-we-fixed-it)
   - [Per-class performance](#per-class-performance)
   - [Reproduction on the real dataset](#reproduction-on-the-real-dataset)
+- [Interpretability — where the model looks](#interpretability--where-the-model-looks)
 - [Discussion & Limitations](#discussion--limitations)
 - [Repository structure](#repository-structure)
 - [Getting started](#getting-started)
@@ -172,11 +173,33 @@ The reproduction **matches — and slightly exceeds — the reported metrics**, 
   <br><em>Independent re-training on the full local CPSC-2018 data: training/validation curves (left) and normalized confusion matrix (right). Strongest classes here: PVC 0.88, I-AVB 0.84, AF 0.82.</em>
 </p>
 
+## Interpretability — where the model looks
+
+The attention layer is more than a pooling trick: its weights are a built-in **explanation**. For each 10-second window they say *which moments* the classifier relied on. Running the trained model with `return_attention=True` and overlaying those weights on the raw **lead-II** trace shows the network behaving like a human reader — it concentrates on the QRS complexes and the abnormal beats, and all but ignores the flat baseline between them.
+
+<p align="center">
+  <img src="assets/attention_heatmap.png" alt="Temporal attention weights overlaid on the lead-II ECG for four arrhythmias" width="92%">
+  <br><em>Attention weights (warm = high) overlaid on real, correctly-classified CPSC-2018 records — one per arrhythmia. The model keys on the diagnostic beats, not the whole trace.</em>
+</p>
+
+- **PVC** — attention spikes precisely on the premature **wide ectopic beats**, the defining feature of the rhythm.
+- **RBBB** — weight concentrates on the **widened QRS complexes**.
+- **AF** — the model tracks the **irregular ventricular beats** (there are no organized P waves to find).
+- **Normal** — attention spreads evenly across regular QRS complexes, consistent with a rhythm that has no single "abnormal" moment to focus on.
+
+That the attention lines up with the features a cardiologist would look for is qualitative evidence the model learned clinically meaningful structure rather than a dataset shortcut. Reproduce it with:
+
+```bash
+python src/visualize_attention.py --data_dir /path/to/CPSC2018 --checkpoint checkpoints/real_model.pt
+# writes assets/attention_heatmap.png
+```
+
 ## Discussion & Limitations
 
 - **Strength.** Strong overall discrimination (AUC 0.94) and near-ceiling accuracy on structurally distinctive arrhythmias; a reproducible before/after study of overfitting mitigation.
 - **Limitation.** AF and PVC remain difficult due to high beat-to-beat variability; residual class imbalance still caps minority-class recall.
-- **Future work.** Stronger imbalance handling (focal loss, targeted augmentation/resampling), beat-level rather than window-level modeling for irregular rhythms, and using the attention weights for clinical explainability (e.g., overlaying attention on the raw ECG).
+- **Interpretability.** The attention weights already provide a built-in, per-beat explanation of each decision — see [Interpretability](#interpretability--where-the-model-looks).
+- **Future work.** Stronger imbalance handling (focal loss, targeted augmentation/resampling), beat-level rather than window-level modeling for irregular rhythms, and validating the attention maps against cardiologist annotations.
 
 ## Repository structure
 
@@ -194,13 +217,17 @@ ecg-arrhythmia-classification/
 │   ├── training_loss_improved.png
 │   ├── confusion_matrix_improved.png
 │   ├── real_run_training_curves.png     # Real-data reproduction (this repo)
-│   └── real_run_confusion_matrix.png
+│   ├── real_run_confusion_matrix.png
+│   └── attention_heatmap.png            # Attention overlaid on the raw ECG
+├── checkpoints/
+│   └── real_model.pt          # Trained weights from the real-data reproduction
 ├── src/                       # Source code
 │   ├── preprocessing.py       # Butterworth + wavelet + normalization + windowing
 │   ├── dataset.py             # CPSC-2018 loading & label handling
 │   ├── model.py               # CNN + Bi-GRU + Attention (≈934,993 params)
 │   ├── train.py               # Training loop, early stopping, LR scheduling
 │   ├── train_raw_cpsc.py      # End-to-end train on the raw CPSC-2018 release (MPS/CUDA/CPU)
+│   ├── visualize_attention.py # Overlay attention weights on the ECG (interpretability)
 │   └── evaluate.py            # Metrics + confusion matrix
 ├── notebooks/
 │   └── reproduce_cpsc2018_colab.ipynb   # One-click end-to-end reproduction on Colab GPU
