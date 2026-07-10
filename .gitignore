@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Data & model artifacts (do not commit large binaries / PHI)
+data/
+checkpoints/
+*.pt
+*.pth
+*.mat
+*.hdf5
+*.npy
+*.npz
+
+# OS / editor
+.DS_Store
+.ipynb_checkpoints/
+.vscode/
+.idea/
